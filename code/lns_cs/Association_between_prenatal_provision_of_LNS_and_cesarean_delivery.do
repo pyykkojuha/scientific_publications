@@ -29,21 +29,62 @@ import delimited "Association_between_prenatal_provision_of_LNS_and_cesarean_del
 **
 ***
 ********************************************************************************
-*** Supplemental table 1 - Comparison of dropout *******************************
+*** Supplemental table 1 - Comparison of dropout + groups by included **********
 ********************************************************************************
+
+* By lost to follow-up (included vs excluded) * * *
 
 tab lost_to_followup 
 
-tabstat moth_age moth_edu , by(lost_to_followup) stat(mean sd)
-anova moth_age    lost_to_followup
-anova moth_edu    lost_to_followup
- 
-tab food_insecure lost_to_followup , exact col
+tabstat moth_age moth_weight moth_height moth_bmi enr_ga moth_edu, by(lost_to_followup) stat(mean sd)
+
+anova moth_age    lost_to_followup 
+anova moth_weight lost_to_followup 
+anova moth_height lost_to_followup 
+anova moth_bmi    lost_to_followup 
+anova enr_ga      lost_to_followup 
+anova moth_edu    lost_to_followup 
+
 tab primiparous   lost_to_followup , exact col
-tab moth_low_bmi  lost_to_followup , exact col
 tab moth_aenemia  lost_to_followup , exact col
 tab moth_hiv      lost_to_followup , exact col
 tab moth_malaria  lost_to_followup , exact col
+
+* By group (included) * * *
+
+tab group if lost_to_followup==0
+
+tabstat moth_age moth_weight moth_height moth_bmi enr_ga moth_edu if lost_to_followup==0, by(group) stat(mean sd)
+
+anova moth_age    group if lost_to_followup==0
+anova moth_weight group if lost_to_followup==0
+anova moth_height group if lost_to_followup==0
+anova moth_bmi    group if lost_to_followup==0
+anova enr_ga      group if lost_to_followup==0
+anova moth_edu    group if lost_to_followup==0
+
+tab primiparous   group if lost_to_followup==0, exact col
+tab moth_aenemia  group if lost_to_followup==0, exact col
+tab moth_hiv      group if lost_to_followup==0, exact col
+tab moth_malaria  group if lost_to_followup==0, exact col
+
+* By group (excluded) * * *
+
+tab group if lost_to_followup==1
+
+tabstat moth_age moth_weight moth_height moth_bmi enr_ga moth_edu if lost_to_followup==1, by(group) stat(mean sd)
+
+anova moth_age    group if lost_to_followup==1
+anova moth_weight group if lost_to_followup==1
+anova moth_height group if lost_to_followup==1
+anova moth_bmi    group if lost_to_followup==1
+anova enr_ga      group if lost_to_followup==1
+anova moth_edu    group if lost_to_followup==1
+
+tab primiparous   group if lost_to_followup==1, exact col
+tab moth_aenemia  group if lost_to_followup==1, exact col
+tab moth_hiv      group if lost_to_followup==1, exact col
+tab moth_malaria  group if lost_to_followup==1, exact col
 
 *
 **
@@ -80,8 +121,8 @@ anova moth_age    group
 anova moth_weight group 
 anova moth_height group 
 anova moth_bmi    group 
-anova moth_edu    group 
 anova enr_ga      group 
+anova moth_edu    group 
 
 tab primiparous   group , exact col
 tab moth_aenemia  group , exact col
@@ -96,7 +137,7 @@ tab moth_malaria  group , exact col
 ******
 *******
 ********************************************************************************
-*** REMOVE DROPOUTS FROM ANALYSIS!                       ***********************
+*** ¡DROP DROPOUTS FROM ANALYSIS!                        ***********************
 *** dropout = no delivery information / twins / abortion ***********************
 ********************************************************************************
 
@@ -129,15 +170,15 @@ tab delivery_place
 
 * Sick visits ************************************************************
 tab nsv     group , col exact 
-glm nsv   i.group , fam(bin) link(log) nolog eform              // IFA-MMN & IFA-LNS
-glm nsv ib2.group , fam(bin) link(log) nolog eform              // MMN-LNS 
+glm nsv   i.group , fam(bin) link(log) nolog eform                    // IFA-MMN & IFA-LNS
+glm nsv ib2.group , fam(bin) link(log) nolog eform                    // MMN-LNS 
 pwcompare group, effects
 test i2.group = i3.group = 0
 
 * Hospital delivery ************************************************************
 tab delivery_hospital     group , col exact
-glm delivery_hospital   i.group , fam(bin) link(log) nolog eform          // IFA-MMN & IFA-LNS
-glm delivery_hospital ib2.group , fam(bin) link(log) nolog eform          // MMN-LNS 
+glm delivery_hospital   i.group , fam(bin) link(log) nolog eform      // IFA-MMN & IFA-LNS
+glm delivery_hospital ib2.group , fam(bin) link(log) nolog eform      // MMN-LNS 
 pwcompare group, effects
 test i2.group = i3.group = 0
 
@@ -209,6 +250,7 @@ glm c_section hcz                   , fam(bin) link(log) nolog eform
 glm c_section moth_height           , fam(bin) link(log) nolog eform  
 glm c_section moth_bmi              , fam(bin) link(log) nolog eform  
 glm c_section moth_age              , fam(bin) link(log) nolog eform  
+glm c_section weekly_weight_gain    , fam(bin) link(log) nolog eform
  
 glm c_section moth_hiv              , fam(bin) link(log) nolog eform  
 glm c_section moth_malaria          , fam(bin) link(log) nolog eform  
@@ -226,9 +268,9 @@ glm c_section i.group sex primiparous del_ga  ///
 * Model 3
 glm c_section i.group sex primiparous del_ga  /// 
 			   laz wlz hcz ///
-               moth_height  moth_crp_above5 moth_edu   ///
+               moth_height weekly_weight_gain moth_crp_above5 moth_edu   ///
 			   , fam(bin) link(log) nolog eform 
-			   
+			   		   
 *
 **
 ***
@@ -309,6 +351,7 @@ glm c_emer hcz                   , fam(bin) link(log) nolog eform
 glm c_emer moth_height           , fam(bin) link(log) nolog eform  
 glm c_emer moth_bmi              , fam(bin) link(log) nolog eform  
 glm c_emer moth_age              , fam(bin) link(log) nolog eform 
+glm c_emer weekly_weight_gain    , fam(bin) link(log) nolog eform
  
 glm c_emer moth_hiv              , fam(bin) link(log) nolog eform  
 glm c_emer moth_malaria          , fam(bin) link(log) nolog eform  
@@ -326,7 +369,7 @@ glm c_emer i.group sex primiparous del_ga  ///
 * Model 3
 glm c_emer i.group sex primiparous del_ga  /// 
 			   laz wlz hcz ///
-               moth_height  moth_crp_above5 moth_edu  ///
+               moth_height weekly_weight_gain moth_crp_above5 moth_edu  ///
 			   , fam(bin) link(log) nolog eform 
 		   
 *
